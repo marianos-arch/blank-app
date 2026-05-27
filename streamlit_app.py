@@ -3,23 +3,34 @@ import pandas as pd
 import streamlit as st
 
 # MUST BE THE FIRST STREAMLIT COMMAND
-st.set_page_config(page_title="Excel to Pipe TXT", layout="centered")
+st.set_page_config(page_title="Excel/CSV to Pipe TXT", layout="centered")
 
 st.title("My quick app")
 #st.write(
 #    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
 #)
 
-st.title("📄 Excel → Pipe-Delimited TXT")
-st.write("Upload an Excel workbook and download its first worksheet as a pipeline-delimited .txt file.")
+st.title("📄 Excel/CSV → Pipe-Delimited TXT")
+st.write(
+    "Upload an Excel workbook and download its first worksheet as a pipeline-delimited .txt file."
+)
+# 1. Let the user choose between Excel and CSV
+file_format = st.radio(
+    "Select your input file format:",
+    options=["Excel", "CSV"],
+    horizontal=True,
+)
 
-def excel_to_pipe_txt(uploaded_file) -> str:
-    """Convert Excel to pipe-delimited text, strictly adhering to specification guidelines."""
-    # 1. Read the Excel file
-    df = pd.read_excel(uploaded_file, engine="openpyxl")
-
+def file_to_pipe_txt(uploaded_file, file_type) -> tuple[str, pd.DataFrame]:
+    """Convert Excel or CSV to pipe-delimited text and return both text and the raw dataframe"""
+    # 1. Read file based on user selection
+    if file_type == "Excel":
+        df = pd.read_excel(uploaded_file, engine="openpyxl")
+    else:
+        df = pd.read_csv(uploaded_file)
+    
     if df.empty:
-        return ""
+        return "", df
 
     # 2. Fix Dates FIRST
     for col in df.columns:
@@ -51,18 +62,18 @@ def excel_to_pipe_txt(uploaded_file) -> str:
         lines.append(row_str)
         
     # 6. Use Windows Carriage Return Line Feed (\r\n) as required by specifications
-    return "\r\n".join(lines)
+    return "\r\n".join(lines), df
 
 uploaded_file = st.file_uploader(
-    "Choose an Excel file",
-    type=["xlsx", "xls"],
-    help="Supports .xlsx and .xls files.",
+    f"Choose an {file_format} file ",
+    type=file_types,
+    help=f"Supports .{file_types[0]} files.",
 )
 
 if uploaded_file is not None:
     try:
-        text = excel_to_pipe_txt(uploaded_file)
-        df = pd.read_excel(uploaded_file)
+        #get both the text layout and the df back from our function
+        text, df = file_to_pipe_txt(uploaded_file, file_format)
 
         st.success(f"Converted {uploaded_file.name} successfully.")
         st.download_button(
@@ -79,7 +90,7 @@ if uploaded_file is not None:
         st.caption("Output format uses '|' as the delimiter and new lines for each row. Note: header removed")
         st.code(text[:4000], language="text")
     except Exception as exc:
-        st.error("Conversion failed. Please make sure the file is a valid Excel workbook.")
+        st.error("Conversion failed. Please make sure the file is a valid {file_format} file.")
         st.exception(exc)
 
  # st run streamlit_app.py
