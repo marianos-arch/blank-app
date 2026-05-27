@@ -15,35 +15,42 @@ st.write("Upload an Excel workbook and download its first worksheet as a pipelin
 
 
 def excel_to_pipe_txt(uploaded_file) -> str:
-    #Convert the first worksheet of an Excel file to pipe-delimited text.
+    """Convert the first worksheet of an Excel file to pipe-delimited text."""
+    # 1. Read the Excel file, keeping it raw
     df = pd.read_excel(uploaded_file, engine="openpyxl")
 
     if df.empty:
         return ""
 
-    # Clean up NaN values
-    cleaned = df.fillna("").astype(str)
-    
-    # FIX: Initialize as an empty list to remove the header row
-    lines = []
-    
-    # FIX: Explicitly convert every cell value in the row to a string before joining
-    lines.extend("|".join(str(val) for val in row) for _, row in cleaned.iterrows())
-
-    # 2. Automatically find and reformat all date columns
+    # 2. Fix Dates FIRST (while they are still recognized as dates/numbers)
     for col in df.columns:
-    # Check if the column contains datetime data
+        # If the column is naturally recognized as datetime data
         if pd.api.types.is_datetime64_any_dtype(df[col]):
             df[col] = df[col].dt.strftime('%m/%d/%Y')
-    # If it's read as text but looks like a timestamp (YYYY-MM-DD)
+        # If it's read as text/object but matches a YYYY-MM-DD pattern
         elif df[col].astype(str).str.match(r'^\d{4}-\d{2}-\d{2}').any():
-            df[col] = pd.to_datetime(df[col], errors='ignore').dt.strftime('%m/%d/%Y')
+            # errors='coerce' turns bad formats to NaT instead of crashing, then we format
+            df[col] = pd.to_datetime(df[col], errors='coerce').dt.strftime('%m/%d/%Y')
 
-# 3. Clean up the rest of your data (nan handling, etc.)
-    df = df.fillna('')
+    # 3. Clean up float numbers (removes '.0' from numbers like 2.0, 5.0)
+    for col in df.columns:
+        # Check if the column is numeric float
+        if pd.api.types.is_float_dtype(df[col]):
+            # Convert to nullable integer if they are whole numbers, otherwise keep as string
+            # This safely removes '.0' without crashing on actual decimals or blanks
+            df[col] = df[col].apply(lambda x: str(int(x)) if pd.notnull(x) and x.is_integer() else x)
+
+    # 4. Replace remaining NaN/NaT values with empty strings
+    cleaned = df.fillna('')
+    
+    # 5. Convert every cell to a string and join with pipes (skipping header)
+    lines = []
+    for _, row in cleaned.iterrows():
+        # Clean up any lingering text 'nan' strings and join
+        row_str = "|".join("" if str(val).lower() == 'nan' else str(val) for val in row)
+        lines.append(row_str)
         
     return "\n".join(lines)
-
 
 uploaded_file = st.file_uploader(
     "Choose an Excel file",
