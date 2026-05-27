@@ -21,9 +21,14 @@ def excel_to_pipe_txt(uploaded_file) -> str:
     if df.empty:
         return ""
 
+    # Clean up NaN values
     cleaned = df.fillna("").astype(str)
-    lines = ["|".join(cleaned.columns.tolist())]
-    lines.extend("|".join(row.tolist()) for _, row in cleaned.iterrows())
+    
+    # Safely convert column headers to strings and join them
+    lines = ["|".join(str(col) for col in cleaned.columns)]
+    
+    # FIX: Explicitly convert every cell value in the row to a string before joining
+    lines.extend("|".join(str(val) for val in row) for _, row in cleaned.iterrows())
 
     return "\n".join(lines)
 
