@@ -25,7 +25,9 @@ def excel_to_pipe_txt(uploaded_file) -> str:
     cleaned = df.fillna("").astype(str)
     
     # Safely convert column headers to strings and join them
-    lines = ["|".join(str(col) for col in cleaned.columns)]
+    #lines = ["|".join(str(col) for col in cleaned.columns)]
+    # FIX: Initialize as an empty list to remove the header row
+    lines = []
     
     # FIX: Explicitly convert every cell value in the row to a string before joining
     lines.extend("|".join(str(val) for val in row) for _, row in cleaned.iterrows())
