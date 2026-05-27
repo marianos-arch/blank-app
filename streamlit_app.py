@@ -48,22 +48,17 @@ def file_to_pipe_txt(uploaded_file, file_type) -> tuple[str, pd.DataFrame]:
     # 4. Replace remaining NaN/NaT values with empty strings
     cleaned = df.fillna('')
     
-    # 5. Convert cells to strings, STRIPIING ALL LEADING/TRAILING SPACES
-    lines = []
-    for _, row in cleaned.iterrows():
-        row_values = []
-        for val in row:
-            val_str = str(val).strip()  # Removes leading/trailing spaces dynamically
-            # Safety check for persistent 'nan' text strings
-            if val_str.lower() == 'nan':
-                val_str = ""
-            row_values.append(val_str)
-            
-        row_str = "|".join(row_values)
-        lines.append(row_str)
-        
-    # 6. Use Windows Carriage Return Line Feed (\r\n) as required by specifications
-    return "\r\n".join(lines), df
+# Strip leading/trailing whitespace from all string columns dynamically
+    for col in cleaned.columns:
+        if cleaned[col].dtype == "object":
+            cleaned[col] = cleaned[col].astype(str).str.strip()
+            cleaned[col] = cleaned[col].replace({'nan': '', 'NaN': ''})
+
+    # 5. Convert to Pipe-Delimited String WITHOUT Header
+    # Works seamlessly for data imported from Excel or CSV
+    pipe_txt = cleaned.to_csv(sep='|', index=False, header=False, line_terminator='\r\n')
+
+    return pipe_txt, df
 
 # Dynamically alter accepted file types based on choice
 file_types = ["xlsx", "xls"] if file_format == "Excel" else ["csv"]
