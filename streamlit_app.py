@@ -18,7 +18,7 @@ st.write("Upload an Excel workbook and download its first worksheet as a pipelin
 
 def excel_to_pipe_txt(uploaded_file) -> str:
     """Convert the first worksheet of an Excel file to pipe-delimited text."""
-    df = pd.read_excel(uploaded_file)
+    df = pd.read_excel(uploaded_file, engine="calamine")
 
     if df.empty:
         return ""
