@@ -1,17 +1,15 @@
 from asyncio import run
-
 import pandas as pd
 import streamlit as st
+
+# MUST BE THE FIRST STREAMLIT COMMAND
+st.set_page_config(page_title="Excel to Pipe TXT", layout="centered")
 
 st.title("🎈 My new app")
 st.write(
     "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
 )
 
-
-
-
-st.set_page_config(page_title="Excel to Pipe TXT", layout="centered")
 st.title("📄 Excel → Pipe-Delimited TXT")
 st.write("Upload an Excel workbook and download its first worksheet as a pipeline-delimited .txt file.")
 
