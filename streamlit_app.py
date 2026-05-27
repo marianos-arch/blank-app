@@ -64,11 +64,15 @@ def file_to_pipe_txt(uploaded_file, file_type) -> tuple[str, pd.DataFrame]:
     # 6. Use Windows Carriage Return Line Feed (\r\n) as required by specifications
     return "\r\n".join(lines), df
 
+# Dynamically alter accepted file types based on choice
+file_types = ["xlsx", "xls"] if file_format == "Excel" else ["csv"]
+
 uploaded_file = st.file_uploader(
-    f"Choose an {file_format} file ",
-    type=file_type,
-    help=f"Supports .{file_type[0]} files.",
+    f"Choose a {file_format} file",
+    type=file_types,
+    help=f"Supports .{file_types[0]} files.",
 )
+
 
 if uploaded_file is not None:
     try:
