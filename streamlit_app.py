@@ -12,8 +12,9 @@ st.title("My quick app")
 
 st.title("📄 Excel/CSV → Pipe-Delimited TXT")
 st.write(
-    "Upload an Excel workbook and download its first worksheet as a pipeline-delimited .txt file."
+    "Upload an Excel/CSV file and download it as a pipeline-delimited .txt file."
 )
+
 # 1. Let the user choose between Excel and CSV
 file_format = st.radio(
     "Select your input file format:",
@@ -93,11 +94,10 @@ if uploaded_file is not None:
 
         st.caption("Output format uses '|' as the delimiter and new lines for each row. Note: header removed")
         st.code(text[:4000], language="text")
+        
     except Exception as exc:
         st.error("Conversion failed. Please make sure the file is a valid {file_format} file.")
         st.exception(exc)
-
- # st run streamlit_app.py
 
 
 
