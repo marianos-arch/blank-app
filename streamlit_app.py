@@ -67,7 +67,7 @@ def file_to_pipe_txt(uploaded_file, file_type) -> tuple[str, pd.DataFrame]:
 uploaded_file = st.file_uploader(
     f"Choose an {file_format} file ",
     type=file_type,
-    help=f"Supports .{file_types[0]} files.",
+    help=f"Supports .{file_type[0]} files.",
 )
 
 if uploaded_file is not None:
