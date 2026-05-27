@@ -1,6 +1,5 @@
 from asyncio import run
 
-Import python-calamine
 import pandas as pd
 import streamlit as st
 
