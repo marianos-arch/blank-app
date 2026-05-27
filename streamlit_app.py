@@ -5,17 +5,17 @@ import streamlit as st
 # MUST BE THE FIRST STREAMLIT COMMAND
 st.set_page_config(page_title="Excel to Pipe TXT", layout="centered")
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+st.title("My quick app")
+#st.write(
+#    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+#)
 
 st.title("📄 Excel → Pipe-Delimited TXT")
 st.write("Upload an Excel workbook and download its first worksheet as a pipeline-delimited .txt file.")
 
 
 def excel_to_pipe_txt(uploaded_file) -> str:
-    """Convert the first worksheet of an Excel file to pipe-delimited text."""
+    #Convert the first worksheet of an Excel file to pipe-delimited text.
     df = pd.read_excel(uploaded_file, engine="openpyxl")
 
     if df.empty:
@@ -24,8 +24,6 @@ def excel_to_pipe_txt(uploaded_file) -> str:
     # Clean up NaN values
     cleaned = df.fillna("").astype(str)
     
-    # Safely convert column headers to strings and join them
-    #lines = ["|".join(str(col) for col in cleaned.columns)]
     # FIX: Initialize as an empty list to remove the header row
     lines = []
     
@@ -58,7 +56,7 @@ if uploaded_file is not None:
         with st.expander("Preview", expanded=True):
             st.dataframe(df.head(10), use_container_width=True)
 
-        st.caption("Output format uses '|' as the delimiter and new lines for each row.")
+        st.caption("Output format uses '|' as the delimiter and new lines for each row. Note: header removed")
         st.code(text[:4000], language="text")
     except Exception as exc:
         st.error("Conversion failed. Please make sure the file is a valid Excel workbook.")
